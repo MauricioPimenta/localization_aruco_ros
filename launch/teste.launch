@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <env name="ROSLAUNCH_SSH_UNKNOWN" value="True"/>
+    <env name="ROSLAUNCH_SSH" value="ssh -F /home/mauricio-ros/Documents/LIMO_CBA/ssh2Limo/limo_ssh_config"/>
+
+    <machine name="limo-robot-01" address="192.168.0.105" user="agilex" password="agx" env-loader="/home/agilex/ros_setup_launch.sh" default="true" />
+
+    <!-- Run a simple command to create a file -->
+    <node pkg="roscpp_tutorials" type="talker" name="talker" machine="limo-robot-01" launch-prefix="touch /home/agilex/roslaunch_test_file" />
+</launch>

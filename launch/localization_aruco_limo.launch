@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<!-- Launch file based on limo_start and astra_camera launch files-->
+<launch>
+    <!-- Set the SSH command to use the custom config file -->
+    <!-- <env name="ROSLAUNCH_SSH_UNKNOWN" value="True"/>
+    <env name="ROSLAUNCH_SSH" value="ssh -F /home/mauricio-ros/Documents/LIMO_CBA/ssh2Limo/limo_ssh_config"/> -->
+
+    <!--
+        Arguments used in limo_base.launch
+    -->
+    <!-- ttyTHS1 for NVIDIA nano serial port-->
+    <!-- ttyUSB0 for IPC USB serial port -->
+    <arg name="port_name"   default="ttyTHS1" />
+    <arg name="use_mcnamu"  default="false" />
+    <arg name="pub_odom_tf" default="false" />
+    <arg name="ns"          default="" />
+    <arg name="namespace"   value="Lx" />
+
+    <!-- <group if="$(eval len(namespace) == 0 or namespace[-1] != '/')">
+        <arg name="namespace" value="$(arg namespace)/" />
+    </group> -->
+
+    <!--
+        Define the frame names to use for the robot
+    -->
+    <arg name="odom_frame"      default="$(arg ns)odom" />
+    <arg name="base_frame"      default="$(arg ns)base_link" />
+    <arg name="camera_frame"    default="$(arg ns)camera_link" />
+    <arg name="imu_frame"       default="$(arg ns)imu_link" />
+    <arg name="laser_frame"     default="$(arg ns)laser_link" />
+
+    <!--
+        Arguments used in astra_camera.launch
+    -->
+
+    <!--
+        Start other launcher files
+    -->
+        <!-- set the limo as the default machine to run the nodes -->
+        <machine  name="LM-001350"
+                  address="192.168.0.105"
+                  username="agilex"
+                  password="agx"
+                  default="true"
+                  env-loader="/home/agilex/ssh_ros_setup.sh"
+        />
+
+        <!-- Start limo_base.launch -->
+        <include file="$(find limo_base)/launch/limo_base.launch">
+            <arg name="namespace"       default="$(arg namespace)" />
+            <arg name="port_name"       default="$(arg port_name)" />
+            <arg name="odom_frame"      default="$(arg odom_frame)" />
+            <arg name="base_frame"      default="$(arg base_frame)" />
+            <arg name="use_mcnamu"      default="$(arg use_mcnamu)" /> 
+            <arg name="pub_odom_tf"     default="$(arg pub_odom_tf)" />
+        </include>
+
+    <!--
+        Nodes to publish the Limo Static transforms
+    -->
+        <!-- base_frame to camera_frame-->
+        <node pkg="tf2_ros" type="static_transform_publisher" name="base_link_to_camera_link"
+            args="0.105 0.0 0.10 0.0 0.0 0.0 $(arg base_frame) $(arg camera_frame)" />
+
+        <!-- base_frame to imu_frame-->
+        <node pkg="tf2_ros" type="static_transform_publisher" name="base_link_to_imu_link"
+            args="0.000 0.0 0.00 0.0 0.0 0.0 $(arg base_frame) $(arg imu_frame)" />
+
+        <!-- base_frame to laser_frame-->
+        <node pkg="tf2_ros" type="static_transform_publisher" name="base_link_to_laser_link"
+            args="0.105 0.0 0.08 0.0 0.0 0.0 $(arg base_frame) $(arg laser_frame)" />
+
+
+        <!-- Start astra_camera.launch -->
+        <include file="$(find astra_camera)/launch/dabai_u3.launch">
+        </include>
+
+
+        <!-- Include Lidar launch file -->
+        <!-- <include file="$(find ydlidar_ros)/launch/X2L.launch">
+            <arg name="namespace" default="$(arg namespace)" />
+        </include> -->
+
+    <!--
+        My Nodes
+        - Localization and Detect Aruco Nodes
+    -->
+        <!-- Include Detect Aruco Markers launcher -->
+        <include file="$(find detect_aruco_markers)/launch/detect_aruco.launch" machine="localhost">
+            <arg name="ns"  value="$(arg ns)" />
+        </include>
+
+        <!-- Include Localization Launcher -->
+        <include file="$(find localization_aruco)/launch/localization_aruco.launch" machine="localhost">
+            <arg name="ns"  value="$(arg ns)" />
+            <arg name="map_name" value="map.yaml" />
+            <arg name="odom_frame" value="$(arg odom_frame)" />
+            <arg name="base_frame" value="$(arg base_frame)" />
+            <arg name="camera_frame" value="$(arg camera_frame)" />
+            <arg name="imu_frame" value="$(arg imu_frame)" />
+            <arg name="laser_frame" value="$(arg laser_frame)" />
+        </include>
+
+
+        <!-- Node attributes -->
+        <!--
+            <node
+                pkg="package-name"
+                type="name-of-executable"
+                name="node-name"
+                args="arg1 arg2 arg3"
+                machine="machine-name-where-to-launch-node"
+                respawn="true-or-false__restart_node_if_it_dies"
+                respawn_delay="time-in-seconds__time_to_wait_before_restarting_node"
+                required="true-or-false__if-true-then-if-node-dies-then-kill-all-nodes"
+                ns="namespace__start-node-in-this-namespace"
+                clear_params="true-or-false__delete-all-parameters-in-node's-private-namespace-before-launch"
+                output="screen-or-log__where-to-print-node-output"
+                cwd="ROS_HOME|node____set-current-working-directory__if 'node' then cwd-is-node's-executable-directory"
+                launch-prefix="prefix arguments____command/arguments-to-prepend-to-node's-launch-arguments__ex:_gdb__valgrind__etc"
+                if="true-or-false___used-to-evaluate-arguments/parameters-and-run-based-on-outcome-without-modifying-launch-file"
+            >
+                <env name="name" value="value" />
+                <remap from="from" to="to" />
+                <param name="name" value="value" ___Set a parameter in the node's ~/local namespace___ />
+                <rosparam command="load|dump" file="filename" __Load-a-rosparam-file-into-this-node's ~/local namespace___ />
+            </node>
+
+        -->
+
+
+</launch>

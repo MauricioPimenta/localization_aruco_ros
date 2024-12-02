@@ -1,0 +1,18 @@
+# Aruco Marker Map - LabAir
+# Position measured in 3D space as the center of each tag, using Optitrack system
+# To use as the map for localizing the Limo Robot in the Lab.
+#
+# Author: Mauricio B. Pimenta
+
+name: Aruco_map_00
+frame_id: world_frame
+num_landmarks: 4
+landmarks:
+    # Aruco Markers Positions - registered clockwise, beggining in the Lab's door
+    # The orientation is saved as a 3D vector, with the angles in Radians -> orientation Vector
+    #  - { ID  , POSITION: [  X  ,  Y  ,  Z  ] , orientation: [  ROLL  ,  PITCH  ,  YAW  ] }
+
+    - { id: 0, position: [1.50,  0.25,  +0.15] , orientation: [1.57, 0, -1.57] }
+    - { id: 25, position: [2.00,  0.75,  +0.15] , orientation: [1.57, 0, -1.57] }
+    - { id: 50, position: [0.75,  2.0,  0.15] , orientation: [1.57, 0, 0] }
+    - { id: 100, position: [1.81,  1.81,  +0.15] , orientation: [1.57, 0, -0.785] }
